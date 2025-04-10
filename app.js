@@ -10,8 +10,12 @@ const hpp = require("hpp");
 
 //import all the routes here:
 const userRoutes = require('./components/users/routers');
+const scheduleRoutes = require('./components/schedules/routers');
+const followsRoutes = require('./components/follows/routes');
 
 // Database Connection
+mongoose.set('debug', true);  // Logs all MongoDB queries to console
+
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -21,15 +25,14 @@ mongoose.connect(process.env.MONGO_URI, {
 
 const app = express();
 
-
 // Security Middleware
 app.disable("x-powered-by"); // Hide Express Server Info
 app.use(helmet());
 app.use(mongoSanitize());
 app.use(xss());
 app.use(hpp());
-app.use(express.json());
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // CORS Configuration
 const corsOptions = {
@@ -1094,6 +1097,8 @@ app.put('/edit_profile', authenticateToken, async (req, res) => {
 
 // Use Routes
 app.use(userRoutes);
+app.use(scheduleRoutes);
+app.use(followsRoutes);
 
 // Catch-all 404 handler
 app.use((req, res) => {

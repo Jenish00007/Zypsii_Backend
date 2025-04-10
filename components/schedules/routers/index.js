@@ -1,0 +1,10 @@
+const express = require('express');
+const router = express.Router();
+
+const createSchedule = require('./postSchedules');
+const ListingSchedules = require('./listingSchedules');
+
+router.use('/schedule', createSchedule);
+router.use('/schedule/listing', ListingSchedules);
+
+module.exports = router;

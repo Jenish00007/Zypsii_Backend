@@ -7,6 +7,9 @@ const userSchema = new Schema(
             type: String,
             required: true,
         },
+        profilePicture:{
+            type:String,
+        },
         userName: {
             type: String,
             required: true,
@@ -32,4 +35,4 @@ const userSchema = new Schema(
     { timestamps: true } // Enables createdAt & updatedAt
 );
 
-module.exports = userSchema;
+module.exports = mongoose.model("users", userSchema);
