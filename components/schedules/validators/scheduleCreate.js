@@ -1,6 +1,7 @@
 const { body } = require("express-validator");
 
 const validateSchedule = [
+
     body("tripName")
         .trim()
         .notEmpty().withMessage("Trip name is required")
@@ -14,49 +15,46 @@ const validateSchedule = [
         .trim()
         .isIn(["Public", "Private", "FriendOnly"]).withMessage("Visible must be 'Public', 'Private', or 'FriendOnly'"),
 
-    body("location")
-        .notEmpty().withMessage("Location is required")
-        .custom(value => {
-            try {
-                const parsedLocation = JSON.parse(value);
-                if (!parsedLocation.from || !parsedLocation.to) {
-                    throw new Error();
-                }
-                return true;
-            } catch (err) {
-                throw new Error("Location must be a valid JSON object with 'from' and 'to'");
-            }
-        }),
+    //validate location
+    body("location.from")
+        .notEmpty().withMessage("Location 'from' is required"),
+    body("location.to")
+        .notEmpty().withMessage("Location 'to' is required"),
 
-    body("dates")
-        .notEmpty().withMessage("Dates are required")
-        .custom(value => {
-            try {
-                const parsedDates = JSON.parse(value);
-                if (!parsedDates.from || !parsedDates.end) {
-                    throw new Error();
-                }
-                return true;
-            } catch (err) {
-                throw new Error("Dates must be a valid JSON object with 'from' and 'end'");
-            }
-        }),
+    //validate dates
+    body("dates.from")
+        .notEmpty().withMessage("Date 'from' is required"),
+    body("dates.end")
+        .notEmpty().withMessage("Date 'end' is required"),
 
     body("numberOfDays")
         .isInt({ min: 1 }).withMessage("Number of days must be a positive integer"),
 
     body("planDescription")
-        .notEmpty().withMessage("Plan description is required")
         .custom(value => {
-            try {
-                const parsedDescription = JSON.parse(value);
-                if (!Array.isArray(parsedDescription) || parsedDescription.length === 0) {
-                    throw new Error();
-                }
-                return true;
-            } catch (err) {
-                throw new Error("Plan description must be a valid JSON array with at least one item");
+            if (!Array.isArray(value) || value.length === 0) {
+                throw new Error("Plan description must be a non-empty array");
             }
+
+            value.forEach((item, index) => {
+                if (!item.Description || typeof item.Description !== "string") {
+                    throw new Error(`planDescription[${index}].Description is required and must be a string`);
+                }
+                if (!item.date || typeof item.date !== "string") {
+                    throw new Error(`planDescription[${index}].date is required and must be a string`);
+                }
+
+                const location = item.location;
+                if (
+                    !location ||
+                    typeof location.latitude === "undefined" ||
+                    typeof location.longitude === "undefined"
+                ) {
+                    throw new Error(`planDescription[${index}].location must include latitude and longitude`);
+                }
+            });
+
+            return true;
         }),
 
     // Custom validation for image upload
