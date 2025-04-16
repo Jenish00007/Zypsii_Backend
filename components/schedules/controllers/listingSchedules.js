@@ -65,6 +65,19 @@ class ListingSchedules {
         };
     };
 
+    static async listingJoinedSchedules(req, res) {
+        try {
+            
+        } catch (error) {
+            console.error("Error fetching schedules by user:", errors);
+            return res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+                error: error.message
+            });
+        }
+    };
+
 };
 
 module.exports = ListingSchedules;
