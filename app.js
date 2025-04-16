@@ -13,8 +13,8 @@ const userRoutes = require('./components/users/routers');
 const scheduleRoutes = require('./components/schedules/routers');
 const followsRoutes = require('./components/follows/routes');
 
-// Database Connection
-mongoose.set('debug', true);  // Logs all MongoDB queries to console
+// Database Connection 
+//mongoose.set('debug', true);  // Logs all MongoDB queries to console for local
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
