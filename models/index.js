@@ -1,5 +1,7 @@
 module.exports = {
     users: require('./users'),
     schedules: require('./schedules'),
-    follows: require('./follows')
+    follows: require('./follows'),
+    posts: require('./posts'),
+    joinSchedule: require('./joinSchedule')
 };

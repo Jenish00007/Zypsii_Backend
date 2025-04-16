@@ -12,8 +12,14 @@ const schedulesSchema = new Schema({
     },
     visible: { type: String, enum: ["Public", "Private", "FriendOnly"], default: "Public" },
     location: {
-        from: { type: Number, required: true },
-        to: { type: Number, required: true }
+        from: {
+            latitude: { type: Number, required: true },
+            longitude: { type: Number, required: true }
+        },
+        to: {
+            latitude: { type: Number, required: true },
+            longitude: { type: Number, required: true }
+        },
     },
     Dates: {
         from: { type: Date, required: true },
@@ -22,13 +28,19 @@ const schedulesSchema = new Schema({
     numberOfDays: { type: Number, required: true },
     planDescription: [
         {
-            Description: { type: String, required: true },
+            Description: { type: String },
             date: { type: Date },
             location: {
-                latitude: { type: Number, required: true },
-                longitude: { type: Number, required: true }
-            }
-        }
+                from: {
+                    latitude: { type: Number },
+                    longitude: { type: Number }
+                },
+                to: {
+                    latitude: { type: Number },
+                    longitude: { type: Number }
+                },
+            },
+        },
     ],
     isDeleted: {
         type: Boolean,
