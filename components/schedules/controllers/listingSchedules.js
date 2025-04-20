@@ -6,8 +6,9 @@ class ListingSchedules {
 
     static async listingMySchedules(req, res) {
         try {
-
-            const filter = req.query.filter;
+            const { filter } = req.query;
+            const offset = parseInt(req.query.offset) || 0;
+            const limit = parseInt(req.query.limit) || 10;
 
             const query = { isDeleted: false };
             const userDetails = await getUserDetails({ id: req.user.id });
@@ -47,7 +48,16 @@ class ListingSchedules {
                 query._id = { $in: joinedScheduleId };
             };
 
-            let getSchedules = await schedules.find(query).select('-planDescription');
+            // Get total count for pagination
+            const totalCount = await schedules.countDocuments(query);
+
+            //fetch the schedules
+            let getSchedules = await schedules
+                .find(query)
+                .select('-planDescription')
+                .skip(offset)
+                .limit(limit);
+
             const scheduleData = [];
 
             //loop every schedule and get the location details of the latitude and longitude.
@@ -68,7 +78,10 @@ class ListingSchedules {
             return res.status(200).json({
                 success: true,
                 message: "Schedules retrieved successfully",
-                data: scheduleData
+                data: scheduleData,
+                totalCount: totalCount,
+                limit: limit,
+                offset: offset
             });
 
         } catch (error) {
@@ -84,6 +97,10 @@ class ListingSchedules {
     static async scheduleDescription(req, res) {
         try {
             const { scheduleId } = req.params;
+            const { limit, offset } = req.query;
+
+            const parsedOffset = parseInt(offset) || 0;
+            const parsedLimit = parseInt(limit) || 10;
 
             const query = {
                 _id: scheduleId,
@@ -113,10 +130,22 @@ class ListingSchedules {
             };
 
             //query for get the details of the schedule description.
-            const getSchedulesDescription = await schedules.findOne(query).select('planDescription');
+            const getSchedulesDescription = await schedules.findOne(query)
+                .select('planDescription')
+
+            if (!getSchedulesDescription || !Array.isArray(getSchedulesDescription.planDescription)) {
+                return res.status(404).json({
+                    success: false,
+                    message: "No schedule description found",
+                });
+            }
+
+            // Slice the planDescription array based on offset & limit
+            const slicedDescriptions = getSchedulesDescription?.planDescription?.slice(parsedOffset, parsedOffset + parsedLimit);
 
             let formattedDescriptions = [];
-            for (const descriptions of getSchedulesDescription?.planDescription) {
+
+            for (const descriptions of slicedDescriptions) {
                 const descriptionLocFromLat = descriptions?.location?.from?.latitude;
                 const descriptionLocFromLog = descriptions?.location?.from?.longitude;
                 const descriptionLocToLat = descriptions?.location?.to?.latitude;
@@ -140,7 +169,12 @@ class ListingSchedules {
             return res.status(200).json({
                 success: true,
                 message: "Schedules description retrieved successfully",
-                data: formattedDescriptions
+                data: formattedDescriptions,
+                pagination: {
+                    offset: parsedOffset,
+                    limit: parsedLimit,
+                    totalCount: getSchedulesDescription.planDescription.length,
+                }
             })
 
         } catch (error) {
