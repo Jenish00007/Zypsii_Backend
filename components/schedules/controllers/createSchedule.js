@@ -1,3 +1,4 @@
+const Moment = require('moment');
 const { schedules, joinSchedule } = require('../../../models');
 const upload = require('../../../middleware/multerUpload');
 const { uploadCloudInAry, getUserDetails } = require('../../../helpers/');
@@ -110,6 +111,58 @@ class ScheduleController {
             return res.status(500).json({
                 status: false,
                 message: "Internal Server Error"
+            });
+        };
+    };
+
+    static async addScheduleDescription(req, res) {
+        try {
+            const { scheduleId } = req.params;
+            const { Description, date, location } = req.body;
+            const parsedMoment = Moment(date, "D-M-YYYY", true);
+            const dateData = parsedMoment.utc().startOf('day').toDate();
+
+            //validate the schedule and description 
+            const fetchSchedule = await getSchedule(scheduleId);
+
+            if (fetchSchedule?.createdBy.toString() !== req.user.id) {
+                return res.status(403).json({
+                    status: false,
+                    message: 'You are not authorized to modify this schedule.'
+                })
+            };
+
+
+            // insert the description in the schedule
+            const getScheduleAndUpdate = await schedules.findByIdAndUpdate(scheduleId, {
+                $push: {
+                    planDescription: {
+                        Description,
+                        date: dateData,
+                        location
+                    }
+                }
+            }, { new: true });
+
+            if (!getScheduleAndUpdate) {
+                return res.status(400).json({
+                    status: false,
+                    message: "Description not inserted successfully."
+                })
+            };
+
+            return res.status(200).json({
+                status: true,
+                message: 'Schedule description added successfully.',
+                data: getScheduleAndUpdate
+            });
+
+        } catch (error) {
+            console.log('Error in the process of adding schedule description', error);
+            return res.status(500).json({
+                status: false,
+                message: "Internal Server Error",
+                error: error.message
             });
         };
     };
