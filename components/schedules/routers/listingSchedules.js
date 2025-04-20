@@ -6,8 +6,7 @@ const { verifyUserToken } = require('../../../middleware/users-auth');
 const ListingSchedules = require('../controllers/listingSchedules');
 const ListPlaces = require('../controllers/listNearestPlace');
 
-router.get('/mySchedule', verifyUserToken, ListingSchedules.listingMySchedules);
-router.get('/getUsers', verifyUserToken, ListingSchedules.listingSchedulesByUser);
+router.get('/filter', verifyUserToken, ListingSchedules.listingMySchedules);
 router.get('/getNearest', verifyUserToken, ListPlaces.nearest);
 
 module.exports = router;
