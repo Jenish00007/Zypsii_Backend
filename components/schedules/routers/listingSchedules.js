@@ -8,5 +8,6 @@ const ListPlaces = require('../controllers/listNearestPlace');
 
 router.get('/filter', verifyUserToken, ListingSchedules.listingMySchedules);
 router.get('/getNearest', verifyUserToken, ListPlaces.nearest);
+router.get('/scheduleDescription/:scheduleId', verifyUserToken, ListingSchedules.scheduleDescription);
 
 module.exports = router;
