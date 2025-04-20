@@ -58,7 +58,7 @@ class ListingSchedules {
                 const scheduleLocToLatitude = schedule.location.to.longitude;
                 const scheduleLocationDetails = await getPlaceDetail(userDetails.location.latitude, userDetails.location.longitude,
                     scheduleLocFromLatitude, scheduleLocFromLongitude, scheduleLocToLongitude, scheduleLocToLatitude);
-            
+
                 scheduleData.push({
                     ...schedule.toObject(),
                     locationDetails: scheduleLocationDetails
@@ -79,6 +79,78 @@ class ListingSchedules {
                 error: error.message
             });
         };
+    };
+
+    static async scheduleDescription(req, res) {
+        try {
+            const { scheduleId } = req.params;
+
+            const query = {
+                _id: scheduleId,
+                createdBy: req.user.id
+            }
+
+            //user data 
+            const fetchUserDetails = await getUserDetails({ id: req.user.id });
+
+            const { latitude, longitude } = fetchUserDetails?.location; //user latitude and longitude
+
+            if (!fetchUserDetails) {
+                return res.status(400).json({
+                    success: false,
+                    message: "User Not exists",
+                })
+            };
+
+            //validate scheduleId belong to the user
+            const checkSchedule = await schedules.findOne(query);
+
+            if (!checkSchedule) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Schedule is not belong to the user logged in",
+                })
+            };
+
+            //query for get the details of the schedule description.
+            const getSchedulesDescription = await schedules.findOne(query).select('planDescription');
+
+            let formattedDescriptions = [];
+            for (const descriptions of getSchedulesDescription?.planDescription) {
+                const descriptionLocFromLat = descriptions?.location?.from?.latitude;
+                const descriptionLocFromLog = descriptions?.location?.from?.longitude;
+                const descriptionLocToLat = descriptions?.location?.to?.latitude;
+                const descriptionLocToLog = descriptions?.location?.to?.longitude;
+
+                const getDescriptionLocationDetails = await getPlaceDetail(latitude, longitude,
+                    descriptionLocFromLat, descriptionLocFromLog,
+                    descriptionLocToLat, descriptionLocToLog
+                );
+
+                const formattedDescription = {
+                    _id: descriptions._id,
+                    Description: descriptions?.Description,
+                    date: descriptions?.date,
+                    planDescription: getDescriptionLocationDetails,
+                }
+
+                formattedDescriptions.push(formattedDescription);
+            };
+
+            return res.status(200).json({
+                success: true,
+                message: "Schedules description retrieved successfully",
+                data: formattedDescriptions
+            })
+
+        } catch (error) {
+            console.log('Error in the schedule description listing :', error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+                error: error.message
+            });
+        }
     };
 };
 
