@@ -55,7 +55,7 @@ const validateSchedule = [
 
                 /** 
                  * we can comment this while testing using postman 
-                
+                **/
                 // Validate location
                 if ("location" in item) {
                     const loc = item.location;
@@ -80,7 +80,6 @@ const validateSchedule = [
                         }
                     }
                 }
-                    */
             });
 
             return true;
