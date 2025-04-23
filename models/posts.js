@@ -3,20 +3,33 @@ const { Schema } = mongoose;
 
 const postSchema = new Schema(
     {
+        postTitle: {
+            type: String,
+            required: true
+        },
         postType: {
             type: String,
             required: true,
             enum: ["Public", "FollowersOnly"]
         },
-        postContent: {
-            type: [String], // Define an explicit type for the array
-            default: [] // Optional: Ensures an empty array is stored by default
+        mediaType: {
+            type: String,
+            required: true,
+            enum: ["image", "video"]
         },
+        mediaUrl: [{
+            type: String,
+            required: true,
+        }],
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: 'users',
             required: true
         },
+        tags: [{ type: String, ref: 'users' }],
+        likesCount: { type: Number, default: 0 },
+        commentsCount: { type: Number, default: 0 },
+        shareCount: { type: Number, default: 0 },
         isDeleted: {
             type: Boolean,
             default: false
@@ -24,5 +37,8 @@ const postSchema = new Schema(
     },
     { timestamps: true }
 );
+
+postSchema.index({ createdBy: 1 });
+postSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model("posts", postSchema);
