@@ -12,6 +12,8 @@ const hpp = require("hpp");
 const userRoutes = require('./components/users/routers');
 const scheduleRoutes = require('./components/schedules/routers');
 const followsRoutes = require('./components/follows/routes');
+const mediaFileUpload = require('./components/commonAPIs/routes/fileUploadRoutes');
+const post = require('./components/posts/routes/');
 
 // Database Connection 
 //mongoose.set('debug', true);  // Logs all MongoDB queries to console for local
@@ -31,7 +33,7 @@ app.use(helmet());
 app.use(mongoSanitize());
 app.use(xss());
 app.use(hpp());
-app.use(express.json({limit: '50mb'}));
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // CORS Configuration
@@ -1099,6 +1101,8 @@ app.put('/edit_profile', authenticateToken, async (req, res) => {
 app.use(userRoutes);
 app.use(scheduleRoutes);
 app.use(followsRoutes);
+app.use(mediaFileUpload);
+app.use(post);
 
 // Catch-all 404 handler
 app.use((req, res) => {
