@@ -1,6 +1,22 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+const planDescriptionSchema = new Schema({
+    Description: { type: String },
+    date: { type: Date },
+    location: {
+        from: {
+            latitude: { type: Number },
+            longitude: { type: Number }
+        },
+        to: {
+            latitude: { type: Number },
+            longitude: { type: Number }
+        }
+    }
+}, { _id: true }); // _id is true by default
+
+
 const schedulesSchema = new Schema({
     createdBy: { type: Schema.Types.ObjectId, ref: 'users', required: true },
     bannerImage: { type: String, required: true },
@@ -26,22 +42,7 @@ const schedulesSchema = new Schema({
         end: { type: Date, required: true }
     },
     numberOfDays: { type: Number, required: true },
-    planDescription: [
-        {
-            Description: { type: String },
-            date: { type: Date },
-            location: {
-                from: {
-                    latitude: { type: Number },
-                    longitude: { type: Number }
-                },
-                to: {
-                    latitude: { type: Number },
-                    longitude: { type: Number }
-                },
-            },
-        },
-    ],
+    planDescription: [planDescriptionSchema],
     isDeleted: {
         type: Boolean,
         default: false

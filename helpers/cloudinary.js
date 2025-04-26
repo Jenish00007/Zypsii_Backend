@@ -7,7 +7,7 @@ cloud.config({
     api_secret: process.env.CLOUD_API_SECRET,
 });
 
-const uploadCloudInAry = async (files) => {
+const uploadCloudInAry = async (files, folderPath) => {
     try {
         
         if (!files || files.length === 0) {
@@ -16,7 +16,7 @@ const uploadCloudInAry = async (files) => {
 
         const uploadOptions = {
             resource_type: 'auto',
-            folder: process.env.CLOUD_FOLDER_NAME,
+            folder: folderPath || process.env.CLOUD_FOLDER_NAME,
             overwrite: true,
             timeout: 60000,
         };
