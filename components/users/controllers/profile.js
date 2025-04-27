@@ -54,30 +54,66 @@ class Profile {
     };
 
 
-    //get Profile details
+    // Get Profile details
     static getProfileDetails = async (req, res) => {
         try {
+            const { search, filter, page = 1, limit = 10 } = req.query;
 
-            const userProfile = await users.findOne(
-                { 
-                    _id: req.user.id,
-                    isDeleted: false
-                }
-            ).select('fullName userName email website bio location profilePicture');
+            const query = { isDeleted: false };
 
-            // Check if user exists
-            if (!userProfile) {
+            if (filter === 'users' && search) {
+                query.$or = [
+                    { fullName: { $regex: search, $options: 'i' } },
+                    { userName: { $regex: search, $options: 'i' } }
+                ];
+            }
+
+            if (filter === 'place' && search) {
+                query.$or = [
+                    { 'placeDetails.name': { $regex: search, $options: 'i' } },
+                    { 'placeDetails.address': { $regex: search, $options: 'i' } }
+                ];
+            }
+
+            if (!filter && !search) {
+                query._id = req.user.id;
+            }
+
+            const skip = (parseInt(page) - 1) * parseInt(limit);
+
+            let userProfileQuery = users.find(query)
+                .select('fullName userName email website bio location profilePicture placeDetails');
+
+            // Apply pagination only if filter is users or place
+            if (filter === 'users' || filter === 'place') {
+                userProfileQuery = userProfileQuery.skip(skip).limit(parseInt(limit));
+            }
+
+            // Execute queries
+            const [userProfile, totalCount] = await Promise.all([
+                userProfileQuery,
+                users.countDocuments(query)
+            ]);
+
+            if (!userProfile || (Array.isArray(userProfile) && userProfile.length === 0)) {
                 return res.status(404).json({
                     success: false,
                     message: "User not found"
                 });
-            };
+            }
 
-            // Send successful response
+            const totalPages = Math.ceil(totalCount / parseInt(limit));
+
             return res.status(200).json({
                 success: true,
                 message: "Profile details retrieved successfully",
-                data: userProfile
+                data: userProfile,
+                pagination: {
+                    totalCount,
+                    totalPages,
+                    currentPage: parseInt(page),
+                    limit: parseInt(limit)
+                }
             });
 
         } catch (errors) {
@@ -87,8 +123,10 @@ class Profile {
                 message: "Internal Server Error",
                 error: errors.message
             });
-        };
+        }
     };
+
+
 }
 
 module.exports = Profile;

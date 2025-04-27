@@ -76,6 +76,13 @@ const getPlaceDetail = async (userLatitude, userLongitude, fromLatitude = undefi
             places.push(...res?.data?.results[0]);
         };
 
+        if (userLatitude && userLongitude && !fromLatitude && !fromLongitude && !toLatitude && !toLongitude) {
+            const googleURL = `${process.env.GOOGLE_GEO_LOCATION_API}?latlng=${userLatitude},${userLongitude}&key=${process.env.GOOGLE_API_KEY}`;
+            const res = await axios.get(googleURL);
+            console.log(res)
+            places.push(res?.data?.results[0]);
+        };
+
         //for get the two pair place details
         if (fromLatitude && fromLongitude && toLatitude && toLongitude) {
             const coords = [

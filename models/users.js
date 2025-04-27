@@ -30,14 +30,18 @@ const userSchema = new Schema(
             latitude: { type: Number, required: true },
             longitude: { type: Number, required: true },
         },
+        placeDetails: {
+            name: { type: String, required: true },
+            address: { type: String, required: true }
+        },
         otp: {
             value: { type: String },
-            createdAt: { type: Date, default: Date.now, expires: 600 } // expires after 10 minutes
+            createdAt: { type: Date, default: null }
         },
         verifyOtp: {
             type: Boolean,
             default: false,
-            createdAt: { type: Date, default: Date.now, expires: 600 } // expires after 10 minutes
+            createdAt: { type: Date, default: null }
         },
         isDeleted: { type: Boolean, default: false }
     },

@@ -80,11 +80,18 @@ class PasswordController {
             });
         };
 
-        if (user?.otp.value !== otp && user?.verifyOtp !== false) {
+        // Calculate time difference
+        const now = Date.now();
+        const otpCreatedAt = new Date(user?.verifyOtp?.createdAt).getTime();
+        const tenMinutes = 10 * 60 * 1000; // 10 minutes in milliseconds
+        const isOtpExpired = (now - otpCreatedAt) >= tenMinutes;
+
+        // Check if OTP is wrong OR expired
+        if (user?.otp?.value !== otp || isOtpExpired) {
             return res.status(400).json({
                 status: false,
                 message: 'Invalid OTP'
-            })
+            });
         };
 
         const encryptedPassword = await hashPassword(password);

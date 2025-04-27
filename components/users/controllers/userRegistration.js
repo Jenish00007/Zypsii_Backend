@@ -1,5 +1,6 @@
 const { users } = require("../../../models");
 const { generateUserName, hashPassword } = require("../helpers/userAuth");
+const { getPlaceDetail } = require('../../schedules/helpers/place');
 
 const userRegistration = async (req, res) => {
     try {
@@ -15,6 +16,9 @@ const userRegistration = async (req, res) => {
             return res.status(400).json({ message: "Email or Username already exists" });
         }
 
+        //get the place details of the latitude and longitude
+        const userPlaceDetails = await getPlaceDetail(latitude, longitude);
+
         // Create new user object
         const newUser = new users({
             fullName,
@@ -24,6 +28,10 @@ const userRegistration = async (req, res) => {
             website: "",
             bio: "",
             location: { latitude, longitude },
+            placeDetails: {
+                name: userPlaceDetails[0]?.name || "",
+                address: userPlaceDetails[0]?.address || ""
+            }
         });
 
         // Save user to database
@@ -34,7 +42,7 @@ const userRegistration = async (req, res) => {
             message: "User registered successfully",
             user: userDetails
         });
-        
+
     } catch (error) {
         console.error("User registration error:", error);
         return res.status(500).json({ message: "Internal Server Error" });
