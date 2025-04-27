@@ -7,8 +7,8 @@ const userSchema = new Schema(
             type: String,
             required: true,
         },
-        profilePicture:{
-            type:String,
+        profilePicture: {
+            type: String,
         },
         userName: {
             type: String,
@@ -29,6 +29,15 @@ const userSchema = new Schema(
         location: {
             latitude: { type: Number, required: true },
             longitude: { type: Number, required: true },
+        },
+        otp: {
+            value: { type: String },
+            createdAt: { type: Date, default: Date.now, expires: 600 } // expires after 10 minutes
+        },
+        verifyOtp: {
+            type: Boolean,
+            default: false,
+            createdAt: { type: Date, default: Date.now, expires: 600 } // expires after 10 minutes
         },
         isDeleted: { type: Boolean, default: false }
     },
