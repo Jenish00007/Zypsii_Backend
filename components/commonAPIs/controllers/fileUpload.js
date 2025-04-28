@@ -21,7 +21,13 @@ class MediaUpload {
                     } else if (SUPPORTED_VIDEO_FORMATS.includes(file?.mimetype) && mediaType == 'post') {
                         uploadPath = `${process.env.CLOUD_FOLDER_NAME}/posts/videos`
                         message = 'Post video uploaded successfully';
-                    };
+                    }else if (SUPPORTED_IMAGE_FORMATS.includes(file?.mimetype) && mediaType == 'shorts'){
+                        uploadPath = `${process.env.CLOUD_FOLDER_NAME}/shorts/thumbnail`
+                        message = 'Post thumbnail uploaded successfully';
+                    }else if(SUPPORTED_VIDEO_FORMATS.includes(file?.mimetype) && mediaType == 'shorts'){
+                        uploadPath = `${process.env.CLOUD_FOLDER_NAME}/shorts/video`
+                        message = 'Post video uploaded successfully';
+                    }
 
                     return [{
                         ...file,

@@ -3,5 +3,6 @@ module.exports = {
     schedules: require('./schedules'),
     follows: require('./follows'),
     posts: require('./posts'),
-    joinSchedule: require('./joinSchedule')
+    joinSchedule: require('./joinSchedule'),
+    shorts: require('./shorts')
 };
