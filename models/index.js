@@ -4,5 +4,6 @@ module.exports = {
     follows: require('./follows'),
     posts: require('./posts'),
     joinSchedule: require('./joinSchedule'),
-    shorts: require('./shorts')
+    shorts: require('./shorts'),
+    story: require('./story')
 };

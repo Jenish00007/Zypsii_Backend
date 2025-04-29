@@ -15,6 +15,7 @@ const followsRoutes = require('./components/follows/routes');
 const mediaFileUpload = require('./components/commonAPIs/routes/fileUploadRoutes');
 const post = require('./components/posts/routes/');
 const shorts = require('./components/shorts/routes');
+const story = require('./components/story/routes');
 
 // Database Connection 
 //mongoose.set('debug', true);  // Logs all MongoDB queries to console for local
@@ -62,6 +63,7 @@ app.use(followsRoutes);
 app.use(mediaFileUpload);
 app.use(post);
 app.use(shorts);
+app.use(story);
 
 // Catch-all 404 handler
 app.use((req, res) => {
