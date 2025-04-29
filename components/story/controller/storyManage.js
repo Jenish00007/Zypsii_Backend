@@ -1,4 +1,4 @@
-const { story } = require('../../../models/'); // adjust the path as per your structure
+const { story } = require('../../../models/');
 
 class storyManage {
     static async createStory(req, res) {
