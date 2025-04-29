@@ -30,13 +30,26 @@ class PasswordController {
             };
             user.verifyOtp = false; // reset verification flag
 
-            await users.findOneAndUpdate({ email: email }, {
-                otp: {
-                    value: otp.toString(),
-                    createdAt: new Date()
+            const updatedUser = await users.findOneAndUpdate(
+                { email },
+                {
+                    $set: {
+                        otp: {
+                            value: otp.toString(),
+                            createdAt: new Date()
+                        },
+                        verifyOtp: false
+                    }
                 },
-                verifyOtp: false
-            })
+                { new: true }
+            );
+
+            if (!updatedUser) {
+                return res.status(400).json({
+                    status: false,
+                    message: "OTP is not updated in DB",
+                })
+            };
 
             const emailTemplate = await ejs.renderFile(
                 path.join(__dirname, '../../../views/otp-forgot-password.ejs'),
