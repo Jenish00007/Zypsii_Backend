@@ -104,7 +104,8 @@ class ListingSchedules {
 
             const query = {
                 _id: scheduleId,
-                createdBy: req.user.id
+                createdBy: req.user.id,
+                isDeleted: false
             }
 
             //user data 
