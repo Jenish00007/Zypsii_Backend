@@ -5,5 +5,6 @@ module.exports = {
     posts: require('./posts'),
     joinSchedule: require('./joinSchedule'),
     shorts: require('./shorts'),
-    story: require('./story')
+    story: require('./story'),
+    favoritePlaces: require('./favoritePlaces')
 };
