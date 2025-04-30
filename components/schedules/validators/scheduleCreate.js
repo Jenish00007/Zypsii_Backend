@@ -1,4 +1,5 @@
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
+const moment = require('moment');
 
 const validateSchedule = [
 
@@ -111,11 +112,11 @@ const validateScheduleDescription = [
 
     body('date')
         .notEmpty().withMessage('Date is required'),
-        //.isISO8601().withMessage('Date must be in ISO8601 format (e.g., 2025-05-01T10:00:00Z)'),
+    //.isISO8601().withMessage('Date must be in ISO8601 format (e.g., 2025-05-01T10:00:00Z)'),
 
     body('location.from.latitude')
         .notEmpty().withMessage('From latitude is required'),
-        //.isFloat({ min: -90, max: 90 }).withMessage('From latitude must be between -90 and 90'),
+    //.isFloat({ min: -90, max: 90 }).withMessage('From latitude must be between -90 and 90'),
 
     body('location.from.longitude')
         .notEmpty().withMessage('From longitude is required')
@@ -130,4 +131,81 @@ const validateScheduleDescription = [
         .isFloat({ min: -180, max: 180 }).withMessage('To longitude must be between -180 and 180')
 ];
 
-module.exports = { validateSchedule, validateJoinFields, validateScheduleDescription };
+const editScheduleValidator = [
+    body('tripName')
+        .optional()
+        .isString().withMessage('Trip name must be a string'),
+
+    body('travelMode')
+        .optional()
+        .isIn(['Car', 'Bike', 'Cycle']).withMessage('Invalid travel mode'),
+
+    body('visible')
+        .optional()
+        .isIn(['Public', 'Private', 'FriendOnly']).withMessage('Invalid visibility option'),
+
+    body('fromLatitude')
+        .optional()
+        .isFloat({ min: -90, max: 90 }).withMessage('Invalid fromLatitude'),
+
+    body('fromLongitude')
+        .optional()
+        .isFloat({ min: -180, max: 180 }).withMessage('Invalid fromLongitude'),
+
+    body('toLatitude')
+        .optional()
+        .isFloat({ min: -90, max: 90 }).withMessage('Invalid toLatitude'),
+
+    body('toLongitude')
+        .optional()
+        .isFloat({ min: -180, max: 180 }).withMessage('Invalid toLongitude'),
+
+    body('fromDate')
+        .optional()
+        .isISO8601().withMessage('Invalid from date'),
+
+    body('toDate')
+        .optional()
+        .isISO8601().withMessage('Invalid to date'),
+
+    body('numberOfDays')
+        .optional()
+        .isInt({ min: 1 }).withMessage('Number of days must be a positive integer'),
+
+    body('bannerImage')
+        .optional()
+        .isURL().withMessage('Invalid banner image URL')
+];
+
+const editScheduleDescriptionValidator = [
+    param('scheduleId')
+        .isMongoId().withMessage('Invalid scheduleId'),
+
+    param('descriptionId')
+        .isMongoId().withMessage('Invalid descriptionId'),
+
+    body('Description')
+        .optional()
+        .isString().withMessage('Description must be a string'),
+
+    body('fromLatitude')
+        .optional()
+        .isFloat({ min: -90, max: 90 }).withMessage('fromLatitude must be a valid latitude'),
+
+    body('fromLongitude')
+        .optional()
+        .isFloat({ min: -180, max: 180 }).withMessage('fromLongitude must be a valid longitude'),
+
+    body('toLatitude')
+        .optional()
+        .isFloat({ min: -90, max: 90 }).withMessage('toLatitude must be a valid latitude'),
+
+    body('toLongitude')
+        .optional()
+        .isFloat({ min: -180, max: 180 }).withMessage('toLongitude must be a valid longitude')
+];
+
+module.exports = {
+    validateSchedule, validateJoinFields, validateScheduleDescription,
+    editScheduleValidator, editScheduleDescriptionValidator
+};
