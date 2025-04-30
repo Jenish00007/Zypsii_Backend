@@ -79,7 +79,6 @@ const getPlaceDetail = async (userLatitude, userLongitude, fromLatitude = undefi
         if (userLatitude && userLongitude && !fromLatitude && !fromLongitude && !toLatitude && !toLongitude) {
             const googleURL = `${process.env.GOOGLE_GEO_LOCATION_API}?latlng=${userLatitude},${userLongitude}&key=${process.env.GOOGLE_API_KEY}`;
             const res = await axios.get(googleURL);
-            console.log(res)
             places.push(res?.data?.results[0]);
         };
 
@@ -136,4 +135,4 @@ const getPlaceDetail = async (userLatitude, userLongitude, fromLatitude = undefi
     };
 };
 
-module.exports = { formatPlaceApiDetails, getPlaceDetail };
+module.exports = { formatPlaceApiDetails, getPlaceDetail, calculateDistanceInKm };
