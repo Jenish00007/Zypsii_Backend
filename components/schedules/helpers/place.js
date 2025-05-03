@@ -135,4 +135,12 @@ const getPlaceDetail = async (userLatitude, userLongitude, fromLatitude = undefi
     };
 };
 
-module.exports = { formatPlaceApiDetails, getPlaceDetail, calculateDistanceInKm };
+// 
+const getDistanceAndTime = async (origin, destination) => {
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&mode=driving&departure_time=now&key=${process.env.GOOGLE_API_KEY}`;
+
+    const response = await axios.get(url);
+    return response.data;
+};
+
+module.exports = { formatPlaceApiDetails, getPlaceDetail, calculateDistanceInKm, getDistanceAndTime};

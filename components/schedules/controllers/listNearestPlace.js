@@ -1,11 +1,11 @@
 const axios = require('axios');
 const { users } = require('../../../models');
-const { formatPlaceApiDetails } = require('../helpers/place');
+const { formatPlaceApiDetails, getDistanceAndTime } = require('../helpers/place');
 
 class ListPlaces {
     static async nearest(req, res) {
         try {
-            const { nextPageToken, searchPlaceName, bestDestination, ...filters } = req.query;
+            const { nextPageToken, recommendSchedules, searchPlaceName, bestDestination, ...filters } = req.query;
             const userId = req.user.id; //logged in user id
 
             const userDetails = await users.findById(userId); // fetch user details
@@ -58,6 +58,74 @@ class ListPlaces {
                 placeDetails = await formatPlaceApiDetails(places, coordinates);
             };
 
+
+            if (recommendSchedules) {
+                const generatedRecommendedSchedules = []
+                for (const place of placeDetails) {
+                    const origin = `${userDetails.location.latitude},${userDetails.location.longitude}`;
+                    const destination = `${place.location.lat},${place.location.lng}`;
+                    const travelTimeAndDistance = await getDistanceAndTime(origin, destination);
+
+                    const durationValue = travelTimeAndDistance.rows[0].elements[0].duration.value; // in seconds
+                    const now = new Date();
+
+                    let fromDate = now;
+                    let endDate = new Date(now.getTime() + durationValue * 1000);
+
+                    const durationInHours = durationValue / 3600;
+
+                    if (durationInHours > 24) {
+                        fromDate = new Date(now.setHours(0, 0, 0, 0));
+                        const days = Math.ceil(durationInHours / 24);
+                        endDate = new Date(fromDate);
+                        endDate.setDate(fromDate.getDate() + days);
+                    }
+
+                    const scheduleCreateStructure = {
+                        createdBy: req.user.id,
+                        bannerImage: place?.image,
+                        tripName: `Travel to ${place.name}`,
+                        travelMode: 'Bike',
+                        location: {
+                            from: {
+                                latitude: userDetails.location.latitude,
+                                longitude: userDetails.location.longitude
+                            },
+                            to: {
+                                latitude: place.location.lat,
+                                longitude: place.location.lng
+                            }
+                        },
+                        placeDetails: {
+                            from: {
+                                name: userDetails.placeDetails.name,
+                                address: userDetails.placeDetails.address,
+                            },
+                            to: {
+                                name: place.name,
+                                address: place.address,
+                                rating: place.rating,
+                                distanceInKilometer: place.distanceInKilometer
+                            }
+                        },
+                        travelDurationAndDetails: travelTimeAndDistance.rows[0].elements[0],
+                        Dates: {
+                            from: fromDate,
+                            end: endDate
+                        },
+                    };
+
+                    generatedRecommendedSchedules.push(scheduleCreateStructure);
+                }
+
+                return res.status(200).json({
+                    success: true,
+                    message: 'Schedule recommendation data',
+                    nextPageToken: nearbyRes?.data?.next_page_token || null,
+                    data: generatedRecommendedSchedules
+                });
+
+            };
 
             return res.status(200).json({
                 success: true,
