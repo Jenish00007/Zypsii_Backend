@@ -19,6 +19,7 @@ const post = require('./components/posts/routes/');
 const shorts = require('./components/shorts/routes');
 const story = require('./components/story/routes');
 const places = require('./components/wheretogo/routes');
+const messageRoutes = require('./components/messages/routes/message.routes');
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -48,7 +49,7 @@ app.use(cors(corsOptions));
 // Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 500,
   message: "Too many requests, please try again later.",
 });
 app.use(limiter);
@@ -62,6 +63,7 @@ app.use(post);
 app.use(shorts);
 app.use(story);
 app.use(places);
+app.use(messageRoutes);
 
 // 404 Handler
 app.use((req, res) => {
