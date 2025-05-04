@@ -1,4 +1,3 @@
-
 const { Server } = require('socket.io');
 const express = require('express');
 const http = require('http');
@@ -21,8 +20,31 @@ const io = new Server(server, {
     },
 });
 
+// Map to store user IDs and their socket IDs
+const userSocketMap = {};
+
 io.on('connection', (socket) => {
     console.log('Socket connected:', socket.id);
+
+    // When a user connects, store their socket ID
+    socket.on('setup', (userId) => {
+        userSocketMap[userId] = socket.id;
+        console.log('User connected:', userId, 'Socket ID:', socket.id);
+    });
+
+    // When a user disconnects, remove their socket ID
+    socket.on('disconnect', () => {
+        const userId = Object.keys(userSocketMap).find(key => userSocketMap[key] === socket.id);
+        if (userId) {
+            delete userSocketMap[userId];
+            console.log('User disconnected:', userId);
+        }
+    });
 });
 
-module.exports = { io, app, server };
+// Function to get socket ID of a user
+const getReceiverSocketId = (userId) => {
+    return userSocketMap[userId];
+};
+
+module.exports = { io, app, server, getReceiverSocketId };
