@@ -20,6 +20,7 @@ const shorts = require('./components/shorts/routes');
 const story = require('./components/story/routes');
 const places = require('./components/wheretogo/routes');
 const messageRoutes = require('./components/messages/routes/message.routes');
+const splitRoutes = require('./components/splits/routes/split.routes');
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -41,7 +42,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // CORS Configuration
 const corsOptions = {
   origin: process.env.ORIGINS,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -64,6 +65,7 @@ app.use(shorts);
 app.use(story);
 app.use(places);
 app.use(messageRoutes);
+app.use(splitRoutes);
 
 // 404 Handler
 app.use((req, res) => {
