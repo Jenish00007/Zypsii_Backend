@@ -143,6 +143,88 @@ class ListPlaces {
             });
         };
     };
+
+    static async generateSuggestedItinerary(req, res) {
+        try {
+            const { searchPlaceName } = req.query;
+            const userId = req.user.id;
+
+            const userDetails = await users.findById(userId);
+            const { latitude, longitude } = userDetails.location;
+
+            // First get the search location coordinates
+            const searchUrl = `${process.env.GOOGLE_PLACE_API}/textsearch/json?query=${encodeURIComponent(searchPlaceName)}&key=${process.env.GOOGLE_API_KEY}`;
+            const searchRes = await axios.get(searchUrl);
+            
+            if (!searchRes.data.results || searchRes.data.results.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "No places found for the search query"
+                });
+            }
+
+            const searchLocation = searchRes.data.results[0].geometry.location;
+
+            // Get nearby places within 10km
+            const nearbyUrl = `${process.env.GOOGLE_PLACE_API}/nearbysearch/json?location=${searchLocation.lat},${searchLocation.lng}&radius=10000&key=${process.env.GOOGLE_API_KEY}`;
+            const nearbyRes = await axios.get(nearbyUrl);
+            const places = nearbyRes.data.results;
+
+            // Filter and sort places by rating
+            const filteredPlaces = places
+                .filter(place => place.rating >= 3.5)
+                .sort((a, b) => b.rating - a.rating)
+                .slice(0, 3); // Get top 3 places
+
+            // Format places and calculate distances
+            const formattedPlaces = await formatPlaceApiDetails(filteredPlaces, {
+                fromLatitude: searchLocation.lat,
+                fromLongitude: searchLocation.lng
+            });
+
+            // Generate suggested itinerary
+            const suggestedItinerary = {
+                title: `Explore ${searchPlaceName}`,
+                places: formattedPlaces.map((place, index) => {
+                    const day = index + 1;
+                    const startTime = new Date();
+                    startTime.setHours(9 + (index * 4)); // Start at 9 AM, then 1 PM, then 5 PM
+                    
+                    const endTime = new Date(startTime);
+                    endTime.setHours(startTime.getHours() + 3); // 3 hours per place
+
+                    return {
+                        name: place.name,
+                        time: `${startTime.getHours()}:00 - ${endTime.getHours()}:00`,
+                        icon: "🏛️", // Default icon, you can customize based on place type
+                        activities: ["Sightseeing", "Photography", "Local Experience"],
+                        date: new Date().toISOString().split('T')[0],
+                        rating: place.rating,
+                        price: "Free", // You can get this from Google Places API
+                        duration: "3 hours",
+                        distance: place.distanceInKilometer,
+                        description: `Day ${day}: Visit ${place.name} and explore its attractions.`,
+                        vehicle: "car",
+                        location: place.location
+                    };
+                })
+            };
+
+            return res.status(200).json({
+                success: true,
+                message: "Suggested itinerary generated successfully",
+                data: suggestedItinerary
+            });
+
+        } catch (error) {
+            console.error("Error generating suggested itinerary:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+                error: error.message
+            });
+        }
+    }
 };
 
 module.exports = ListPlaces;
